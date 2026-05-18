@@ -119,20 +119,33 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
             pass
 
     # Automatically register Lovelace resource
-    async def async_register_lovelace_resource(event):
-        """Register Lovelace resource when Home Assistant starts."""
+    async def async_register_lovelace_resource():
+        """Register Lovelace resource."""
         if "lovelace" not in hass.data:
             return
 
         resources = hass.data["lovelace"].get("resources")
         if resources:
             url = "/scavenger-hunt-card.js"
-            if not any(res.get("url") == url for res in resources.async_items()):
+            try:
+                items = resources.async_items()
+            except AttributeError:
+                items = getattr(resources, "data", [])
+            
+            if not any(res.get("url") == url for res in items):
                 _LOGGER.info("Automatically registering Lovelace resource for Scavenger Hunt Card")
                 if hasattr(resources, "async_create_item"):
                     await resources.async_create_item({"res_type": "module", "url": url})
 
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, async_register_lovelace_resource)
+    # If Home Assistant is already fully running, run the registration immediately.
+    # Otherwise, wait for the start event to ensure lovelace storage has initialized.
+    if hass.is_running:
+        hass.async_create_task(async_register_lovelace_resource())
+    else:
+        hass.bus.async_listen_once(
+            EVENT_HOMEASSISTANT_START,
+            lambda event: hass.async_create_task(async_register_lovelace_resource())
+        )
 
     # Register services
     async def handle_reveal_total(call):
