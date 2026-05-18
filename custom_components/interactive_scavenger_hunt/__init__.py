@@ -107,7 +107,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
     await hass.config_entries.async_reload(entry.entry_id)
 
-async def _async_setup_common(hass: HomeAssistant, manager: ScavengerHuntManager):
+async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManager"):
     """Common setup logic for both entry and YAML."""
     # Register static path for the dashboard card
     card_path = hass.config.path(f"custom_components/{DOMAIN}/dashboard/scavenger-hunt-card.js")
