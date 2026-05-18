@@ -2,34 +2,34 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configure Scavenger Hunt",
+        "title": "Configure scavenger hunt",
         "description": "Set up your interactive scavenger hunt base options.",
         "data": {
-          "title": "Hunt Title",
+          "title": "Hunt title",
           "lights": "Lights to flash",
           "media_player": "Speaker for sound effects"
         }
       },
       "manage_tags": {
-        "title": "Manage Hunt Tags",
+        "title": "Manage hunt tags",
         "description": "Choose an action to configure the tags for your hunt.",
         "menu_options": {
           "add_tag": "Add a new tag",
           "remove_tag": "Remove an existing tag",
-          "finish": "Finish & Create Hunt"
+          "finish": "Finish and create hunt"
         }
       },
       "add_tag": {
-        "title": "Add New Tag",
-        "description": "Define the physical tag (NFC/QR) detail.",
+        "title": "Add new tag",
+        "description": "Define the physical tag (NFC/QR) details.",
         "data": {
-          "tag_id": "Tag ID / Scanned Payload",
-          "name": "Tag Friendly Name / Location",
-          "required": "Required Tag (For one-time bypass guess)"
+          "tag_id": "Tag ID / scanned payload",
+          "name": "Tag friendly name / location",
+          "required": "Required tag (for one-time bypass guess)"
         }
       },
       "remove_tag": {
-        "title": "Remove Tag",
+        "title": "Remove tag",
         "description": "Select the tags you want to remove.",
         "data": {
           "tags_to_remove": "Tags to delete"
@@ -40,16 +40,16 @@
   "options": {
     "step": {
       "init": {
-        "title": "Manage Scavenger Hunt",
+        "title": "Manage scavenger hunt",
         "description": "Select an action to modify your hunt settings or tags.",
         "menu_options": {
-          "edit_settings": "Edit Settings (Lights, Speaker)",
+          "edit_settings": "Edit settings (lights, speaker)",
           "add_tag": "Add a new tag",
           "remove_tag": "Remove an existing tag"
         }
       },
       "edit_settings": {
-        "title": "Edit Settings",
+        "title": "Edit settings",
         "description": "Update the target lights or speaker.",
         "data": {
           "lights": "Lights to flash",
@@ -57,16 +57,16 @@
         }
       },
       "add_tag": {
-        "title": "Add New Tag",
-        "description": "Define the physical tag (NFC/QR) detail.",
+        "title": "Add new tag",
+        "description": "Define the physical tag (NFC/QR) details.",
         "data": {
-          "tag_id": "Tag ID / Scanned Payload",
-          "name": "Tag Friendly Name / Location",
-          "required": "Required Tag (For one-time bypass guess)"
+          "tag_id": "Tag ID / scanned payload",
+          "name": "Tag friendly name / location",
+          "required": "Required tag (for one-time bypass guess)"
         }
       },
       "remove_tag": {
-        "title": "Remove Tag",
+        "title": "Remove tag",
         "description": "Select the tags you want to remove.",
         "data": {
           "tags_to_remove": "Tags to delete"
