@@ -53,8 +53,10 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+from homeassistant.config_entries import ConfigEntry
+
 async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the scavenger hunt integration."""
+    """Set up the scavenger hunt integration from YAML."""
     conf = config.get(DOMAIN)
     if conf is None:
         return True
@@ -66,11 +68,55 @@ async def async_setup(hass: HomeAssistant, config: dict):
     manager = ScavengerHuntManager(hass, tags_config, lights, media_player)
     hass.data[DOMAIN] = manager
 
+    await _async_setup_common(hass, manager)
+
+    # Load platforms
+    hass.async_create_task(async_load_platform(hass, "sensor", DOMAIN, {}, config))
+    hass.async_create_task(async_load_platform(hass, "binary_sensor", DOMAIN, {}, config))
+
+    return True
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Interactive Scavenger Hunt from a config entry."""
+    config = entry.data
+    tags_config = config.get(CONF_TAGS, [])
+    lights = config.get(CONF_LIGHTS, [])
+    media_player = config.get(CONF_MEDIA_PLAYER)
+    
+    manager = ScavengerHuntManager(hass, tags_config, lights, media_player)
+    hass.data[DOMAIN] = manager
+
+    await _async_setup_common(hass, manager)
+
+    # Forward entry setups to platforms
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "binary_sensor"])
+
+    # Reload on update
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
+    return True
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor", "binary_sensor"])
+    if unload_ok:
+        hass.data.pop(DOMAIN, None)
+    return unload_ok
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload config entry."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+async def _async_setup_common(hass: HomeAssistant, manager: ScavengerHuntManager):
+    """Common setup logic for both entry and YAML."""
     # Register static path for the dashboard card
     card_path = hass.config.path(f"custom_components/{DOMAIN}/dashboard/scavenger-hunt-card.js")
     if os.path.exists(card_path):
-        hass.http.register_static_path("/scavenger-hunt-card.js", card_path)
-        _LOGGER.debug("Registered static path for scavenger-hunt-card.js")
+        try:
+            hass.http.register_static_path("/scavenger-hunt-card.js", card_path)
+            _LOGGER.debug("Registered static path for scavenger-hunt-card.js")
+        except Exception:
+            pass
 
     # Automatically register Lovelace resource
     async def async_register_lovelace_resource(event):
@@ -80,7 +126,6 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
         resources = hass.data["lovelace"].get("resources")
         if resources:
-            # Check if already registered
             url = "/scavenger-hunt-card.js"
             if not any(res.get("url") == url for res in resources.async_items()):
                 _LOGGER.info("Automatically registering Lovelace resource for Scavenger Hunt Card")
@@ -130,12 +175,6 @@ async def async_setup(hass: HomeAssistant, config: dict):
             hass.async_create_task(manager.process_tag(tag_id))
 
     hass.bus.async_listen(EVENT_TAG_SCANNED, async_tag_scanned)
-
-    # Load platforms
-    hass.async_create_task(async_load_platform(hass, "sensor", DOMAIN, {}, config))
-    hass.async_create_task(async_load_platform(hass, "binary_sensor", DOMAIN, {}, config))
-
-    return True
 
 class ScavengerHuntManager:
     """Manages the scavenger hunt state."""

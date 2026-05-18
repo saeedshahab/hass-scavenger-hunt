@@ -20,6 +20,18 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         
     async_add_entities(entities)
 
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the scavenger hunt binary sensors from a config entry."""
+    manager = hass.data[DOMAIN]
+    
+    entities = [ScavengerHuntCompletionSensor(manager)]
+    
+    # Add an entity for each tag
+    for tag_id, tag_config in manager.tags_config.items():
+        entities.append(ScavengerHuntTagSensor(manager, tag_id, tag_config["name"]))
+        
+    async_add_entities(entities)
+
 class ScavengerHuntCompletionSensor(BinarySensorEntity):
     """Sensor tracking if the hunt is complete."""
 

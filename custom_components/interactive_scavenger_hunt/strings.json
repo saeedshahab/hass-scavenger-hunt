@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Scavenger Hunt",
+        "description": "Set up your interactive scavenger hunt base options.",
+        "data": {
+          "title": "Hunt Title",
+          "lights": "Lights to flash",
+          "media_player": "Speaker for sound effects"
+        }
+      },
+      "manage_tags": {
+        "title": "Manage Hunt Tags",
+        "description": "Choose an action to configure the tags for your hunt.",
+        "menu_options": {
+          "add_tag": "Add a new tag",
+          "remove_tag": "Remove an existing tag",
+          "finish": "Finish & Create Hunt"
+        }
+      },
+      "add_tag": {
+        "title": "Add New Tag",
+        "description": "Define the physical tag (NFC/QR) detail.",
+        "data": {
+          "tag_id": "Tag ID / Scanned Payload",
+          "name": "Tag Friendly Name / Location",
+          "required": "Required Tag (For one-time bypass guess)"
+        }
+      },
+      "remove_tag": {
+        "title": "Remove Tag",
+        "description": "Select the tags you want to remove.",
+        "data": {
+          "tags_to_remove": "Tags to delete"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage Scavenger Hunt",
+        "description": "Select an action to modify your hunt settings or tags.",
+        "menu_options": {
+          "edit_settings": "Edit Settings (Lights, Speaker)",
+          "add_tag": "Add a new tag",
+          "remove_tag": "Remove an existing tag"
+        }
+      },
+      "edit_settings": {
+        "title": "Edit Settings",
+        "description": "Update the target lights or speaker.",
+        "data": {
+          "lights": "Lights to flash",
+          "media_player": "Speaker for sound effects"
+        }
+      },
+      "add_tag": {
+        "title": "Add New Tag",
+        "description": "Define the physical tag (NFC/QR) detail.",
+        "data": {
+          "tag_id": "Tag ID / Scanned Payload",
+          "name": "Tag Friendly Name / Location",
+          "required": "Required Tag (For one-time bypass guess)"
+        }
+      },
+      "remove_tag": {
+        "title": "Remove Tag",
+        "description": "Select the tags you want to remove.",
+        "data": {
+          "tags_to_remove": "Tags to delete"
+        }
+      }
+    }
+  }
+}

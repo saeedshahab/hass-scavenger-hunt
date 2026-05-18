@@ -19,6 +19,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     manager = hass.data[DOMAIN]
     async_add_entities([ScavengerHuntScoreSensor(manager)])
 
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the scavenger hunt sensor from a config entry."""
+    manager = hass.data[DOMAIN]
+    async_add_entities([ScavengerHuntScoreSensor(manager)])
+
 class ScavengerHuntScoreSensor(RestoreEntity, SensorEntity):
     """Sensor tracking the scavenger hunt score."""
 
