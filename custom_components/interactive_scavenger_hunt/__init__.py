@@ -109,6 +109,14 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManager"):
     """Common setup logic for both entry and YAML."""
+    # Get component version from manifest.json dynamically
+    from homeassistant.loader import async_get_integration
+    try:
+        integration = await async_get_integration(hass, DOMAIN)
+        version = integration.version
+    except Exception:
+        version = "1.0.0"
+
     # Register static path for the dashboard card using robust absolute directory resolution
     card_path = os.path.join(os.path.dirname(__file__), "dashboard", "scavenger-hunt-card.js")
     if os.path.exists(card_path):
@@ -131,7 +139,7 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
 
         resources = hass.data["lovelace"].get("resources")
         if resources:
-            target_url = "/scavenger-hunt-card.js?v=1.0.1"
+            target_url = f"/scavenger-hunt-card.js?v={version}"
             try:
                 items = list(resources.async_items())
             except AttributeError:
