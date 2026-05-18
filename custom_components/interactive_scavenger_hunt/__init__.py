@@ -113,7 +113,10 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
     card_path = os.path.join(os.path.dirname(__file__), "dashboard", "scavenger-hunt-card.js")
     if os.path.exists(card_path):
         try:
-            hass.http.register_static_path("/scavenger-hunt-card.js", card_path)
+            from homeassistant.components.http import StaticPathConfig
+            await hass.http.async_register_static_paths([
+                StaticPathConfig("/scavenger-hunt-card.js", card_path, False)
+            ])
             _LOGGER.info("Successfully registered static path /scavenger-hunt-card.js to %s", card_path)
         except Exception as e:
             _LOGGER.error("Failed to register static path for scavenger-hunt-card.js: %s", e)
