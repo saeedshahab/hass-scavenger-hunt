@@ -123,7 +123,7 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
     else:
         _LOGGER.error("Scavenger hunt dashboard card not found at expected path: %s", card_path)
 
-    # Automatically register Lovelace resource
+    # Automatically register Lovelace resource with cache buster to force browser update
     async def async_register_lovelace_resource():
         """Register Lovelace resource."""
         if "lovelace" not in hass.data:
@@ -131,16 +131,33 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
 
         resources = hass.data["lovelace"].get("resources")
         if resources:
-            url = "/scavenger-hunt-card.js"
+            target_url = "/scavenger-hunt-card.js?v=1.0.1"
             try:
-                items = resources.async_items()
+                items = list(resources.async_items())
             except AttributeError:
-                items = getattr(resources, "data", [])
+                items = list(getattr(resources, "data", []))
             
-            if not any(res.get("url") == url for res in items):
-                _LOGGER.info("Automatically registering Lovelace resource for Scavenger Hunt Card")
+            # Find and clean up any old registered resources of scavenger-hunt-card.js
+            for item in items:
+                item_url = item.get("url", "")
+                if "/scavenger-hunt-card.js" in item_url and item_url != target_url:
+                    _LOGGER.info("Removing outdated Lovelace resource: %s", item_url)
+                    if hasattr(resources, "async_delete_item"):
+                        try:
+                            await resources.async_delete_item(item.get("id"))
+                        except Exception as e:
+                            _LOGGER.error("Failed to delete Lovelace resource %s: %s", item_url, e)
+
+            # Re-fetch items to verify if we need to add the new target_url
+            try:
+                items = list(resources.async_items())
+            except AttributeError:
+                items = list(getattr(resources, "data", []))
+            
+            if not any(res.get("url") == target_url for res in items):
+                _LOGGER.info("Automatically registering Lovelace resource: %s", target_url)
                 if hasattr(resources, "async_create_item"):
-                    await resources.async_create_item({"res_type": "module", "url": url})
+                    await resources.async_create_item({"res_type": "module", "url": target_url})
 
     # If Home Assistant is already fully running, run the registration immediately.
     # Otherwise, wait for the start event to ensure lovelace storage has initialized.
