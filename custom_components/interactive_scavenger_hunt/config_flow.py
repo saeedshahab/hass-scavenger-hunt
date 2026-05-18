@@ -166,7 +166,8 @@ class InteractiveScavengerHuntOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry) -> None:
         """Initialize options flow."""
-        super().__init__(config_entry)
+        super().__init__()
+        self._config_entry = config_entry
         self.options = dict(config_entry.data)
 
     def _get_registered_tags_options(self):
