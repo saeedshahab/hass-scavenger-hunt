@@ -28,6 +28,27 @@ class InteractiveScavengerHuntConfigFlow(config_entries.ConfigFlow, domain=DOMAI
             CONF_TAGS: [],
         }
 
+    def _get_registered_tags_options(self):
+        """Get options for registered tags dropdown from Home Assistant's Tag registry."""
+        options = []
+        tag_store = self.hass.data.get("tag")
+        if tag_store:
+            from homeassistant.helpers import entity_registry as er
+            entity_registry = er.async_get(self.hass)
+            
+            for item in tag_store.async_items():
+                tag_id = item.get("id")
+                if not tag_id:
+                    continue
+                name = f"Tag {tag_id}"
+                entity_id = entity_registry.async_get_entity_id("tag", "tag", tag_id)
+                if entity_id:
+                    entity = entity_registry.async_get(entity_id)
+                    if entity:
+                        name = entity.name or entity.original_name or name
+                options.append({"value": tag_id, "label": f"{name} ({tag_id})"})
+        return options
+
     async def async_step_user(self, user_input=None):
         """Handle the initial config step."""
         if user_input is not None:
@@ -59,23 +80,40 @@ class InteractiveScavengerHuntConfigFlow(config_entries.ConfigFlow, domain=DOMAI
 
     async def async_step_add_tag(self, user_input=None):
         """Add a new tag to the configuration."""
+        errors = {}
         if user_input is not None:
-            self.entry_data[CONF_TAGS].append({
-                CONF_TAG_ID: user_input[CONF_TAG_ID],
-                CONF_NAME: user_input[CONF_NAME],
-                CONF_REQUIRED: user_input.get(CONF_REQUIRED, False),
-            })
-            return await self.async_step_manage_tags()
+            tag_id = user_input.get(CONF_TAG_ID) or user_input.get("selected_tag")
+            if not tag_id:
+                errors["base"] = "missing_tag_id"
+            else:
+                self.entry_data[CONF_TAGS].append({
+                    CONF_TAG_ID: tag_id,
+                    CONF_NAME: user_input[CONF_NAME],
+                    CONF_REQUIRED: user_input.get(CONF_REQUIRED, False),
+                })
+                return await self.async_step_manage_tags()
 
-        data_schema = vol.Schema(
-            {
-                vol.Required(CONF_TAG_ID): str,
-                vol.Required(CONF_NAME): str,
-                vol.Optional(CONF_REQUIRED, default=False): bool,
-            }
+        registered_tags = self._get_registered_tags_options()
+        schema_dict = {}
+        if registered_tags:
+            schema_dict[vol.Optional("selected_tag")] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=registered_tags,
+                    mode=selector.SelectSelectorMode.DROPDOWN
+                )
+            )
+            schema_dict[vol.Optional(CONF_TAG_ID)] = str
+        else:
+            schema_dict[vol.Required(CONF_TAG_ID)] = str
+
+        schema_dict[vol.Required(CONF_NAME)] = str
+        schema_dict[vol.Optional(CONF_REQUIRED, default=False)] = bool
+
+        return self.async_show_form(
+            step_id="add_tag",
+            data_schema=vol.Schema(schema_dict),
+            errors=errors
         )
-
-        return self.async_show_form(step_id="add_tag", data_schema=data_schema)
 
     async def async_step_remove_tag(self, user_input=None):
         """Remove a tag from the configuration."""
@@ -128,8 +166,29 @@ class InteractiveScavengerHuntOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        super().__init__(config_entry)
         self.options = dict(config_entry.data)
+
+    def _get_registered_tags_options(self):
+        """Get options for registered tags dropdown from Home Assistant's Tag registry."""
+        options = []
+        tag_store = self.hass.data.get("tag")
+        if tag_store:
+            from homeassistant.helpers import entity_registry as er
+            entity_registry = er.async_get(self.hass)
+            
+            for item in tag_store.async_items():
+                tag_id = item.get("id")
+                if not tag_id:
+                    continue
+                name = f"Tag {tag_id}"
+                entity_id = entity_registry.async_get_entity_id("tag", "tag", tag_id)
+                if entity_id:
+                    entity = entity_registry.async_get(entity_id)
+                    if entity:
+                        name = entity.name or entity.original_name or name
+                options.append({"value": tag_id, "label": f"{name} ({tag_id})"})
+        return options
 
     async def async_step_init(self, user_input=None):
         """Manage options flow entry point."""
@@ -163,28 +222,45 @@ class InteractiveScavengerHuntOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_add_tag(self, user_input=None):
         """Add a new tag in options flow."""
+        errors = {}
         if user_input is not None:
-            if CONF_TAGS not in self.options:
-                self.options[CONF_TAGS] = []
-            self.options[CONF_TAGS].append({
-                CONF_TAG_ID: user_input[CONF_TAG_ID],
-                CONF_NAME: user_input[CONF_NAME],
-                CONF_REQUIRED: user_input.get(CONF_REQUIRED, False),
-            })
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, data=self.options
+            tag_id = user_input.get(CONF_TAG_ID) or user_input.get("selected_tag")
+            if not tag_id:
+                errors["base"] = "missing_tag_id"
+            else:
+                if CONF_TAGS not in self.options:
+                    self.options[CONF_TAGS] = []
+                self.options[CONF_TAGS].append({
+                    CONF_TAG_ID: tag_id,
+                    CONF_NAME: user_input[CONF_NAME],
+                    CONF_REQUIRED: user_input.get(CONF_REQUIRED, False),
+                })
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, data=self.options
+                )
+                return self.async_create_entry(title="", data={})
+
+        registered_tags = self._get_registered_tags_options()
+        schema_dict = {}
+        if registered_tags:
+            schema_dict[vol.Optional("selected_tag")] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=registered_tags,
+                    mode=selector.SelectSelectorMode.DROPDOWN
+                )
             )
-            return self.async_create_entry(title="", data={})
+            schema_dict[vol.Optional(CONF_TAG_ID)] = str
+        else:
+            schema_dict[vol.Required(CONF_TAG_ID)] = str
 
-        data_schema = vol.Schema(
-            {
-                vol.Required(CONF_TAG_ID): str,
-                vol.Required(CONF_NAME): str,
-                vol.Optional(CONF_REQUIRED, default=False): bool,
-            }
+        schema_dict[vol.Required(CONF_NAME)] = str
+        schema_dict[vol.Optional(CONF_REQUIRED, default=False)] = bool
+
+        return self.async_show_form(
+            step_id="add_tag",
+            data_schema=vol.Schema(schema_dict),
+            errors=errors
         )
-
-        return self.async_show_form(step_id="add_tag", data_schema=data_schema)
 
     async def async_step_remove_tag(self, user_input=None):
         """Remove a tag in options flow."""

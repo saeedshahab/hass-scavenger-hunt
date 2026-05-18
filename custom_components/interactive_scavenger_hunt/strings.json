@@ -1,5 +1,8 @@
 {
   "config": {
+    "error": {
+      "missing_tag_id": "You must select a registered tag or enter a custom tag ID."
+    },
     "step": {
       "user": {
         "title": "Configure scavenger hunt",
@@ -21,9 +24,10 @@
       },
       "add_tag": {
         "title": "Add new tag",
-        "description": "Define the physical tag (NFC/QR) details.",
+        "description": "Define the physical tag (NFC/QR) details. You can select an existing tag from your Home Assistant registry or write a custom ID below.",
         "data": {
-          "tag_id": "Tag ID / scanned payload",
+          "selected_tag": "Choose registered tag",
+          "tag_id": "Tag ID / scanned payload (or custom entry)",
           "name": "Tag friendly name / location",
           "required": "Required tag (for one-time bypass guess)"
         }
@@ -38,6 +42,9 @@
     }
   },
   "options": {
+    "error": {
+      "missing_tag_id": "You must select a registered tag or enter a custom tag ID."
+    },
     "step": {
       "init": {
         "title": "Manage scavenger hunt",
@@ -58,9 +65,10 @@
       },
       "add_tag": {
         "title": "Add new tag",
-        "description": "Define the physical tag (NFC/QR) details.",
+        "description": "Define the physical tag (NFC/QR) details. You can select an existing tag from your Home Assistant registry or write a custom ID below.",
         "data": {
-          "tag_id": "Tag ID / scanned payload",
+          "selected_tag": "Choose registered tag",
+          "tag_id": "Tag ID / scanned payload (or custom entry)",
           "name": "Tag friendly name / location",
           "required": "Required tag (for one-time bypass guess)"
         }
