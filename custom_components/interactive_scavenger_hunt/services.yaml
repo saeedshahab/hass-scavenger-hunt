@@ -1,0 +1,37 @@
+reveal_total:
+  description: "Reveals the total number of tags in the game. Only available when score is >= total - 2."
+
+jump_the_line:
+  description: "Skips the last remaining tag. Only available when total is revealed and score is == total - 1."
+
+guess_bypass:
+  description: "One-time attempt to finish the game early by guessing the total number of tags."
+  fields:
+    guess:
+      description: "Your guess for the total number of tags."
+      example: 20
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 100
+
+reset_game:
+  description: "Resets the game progress, cleared scanned tags, and resets all lifelines."
+
+verify_completion:
+  description: "Verifies if all tags have been scanned to complete the game."
+
+play_sound:
+  description: "Manually trigger a game sound effect on the dashboard."
+  fields:
+    sound_type:
+      description: "The type of sound to play."
+      example: "success"
+      required: true
+      selector:
+        select:
+          options:
+            - "success"
+            - "error"
+            - "victory"
