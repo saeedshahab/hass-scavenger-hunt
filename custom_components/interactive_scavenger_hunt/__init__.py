@@ -109,14 +109,16 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManager"):
     """Common setup logic for both entry and YAML."""
-    # Register static path for the dashboard card
-    card_path = hass.config.path(f"custom_components/{DOMAIN}/dashboard/scavenger-hunt-card.js")
+    # Register static path for the dashboard card using robust absolute directory resolution
+    card_path = os.path.join(os.path.dirname(__file__), "dashboard", "scavenger-hunt-card.js")
     if os.path.exists(card_path):
         try:
             hass.http.register_static_path("/scavenger-hunt-card.js", card_path)
-            _LOGGER.debug("Registered static path for scavenger-hunt-card.js")
-        except Exception:
-            pass
+            _LOGGER.info("Successfully registered static path /scavenger-hunt-card.js to %s", card_path)
+        except Exception as e:
+            _LOGGER.error("Failed to register static path for scavenger-hunt-card.js: %s", e)
+    else:
+        _LOGGER.error("Scavenger hunt dashboard card not found at expected path: %s", card_path)
 
     # Automatically register Lovelace resource
     async def async_register_lovelace_resource():

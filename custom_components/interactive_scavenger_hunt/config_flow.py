@@ -168,7 +168,12 @@ class InteractiveScavengerHuntOptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize options flow."""
         super().__init__()
         self._config_entry = config_entry
-        self.options = dict(config_entry.data)
+        self.options = {
+            "title": config_entry.data.get("title", "Interactive Scavenger Hunt"),
+            CONF_LIGHTS: list(config_entry.data.get(CONF_LIGHTS, [])),
+            CONF_MEDIA_PLAYER: config_entry.data.get(CONF_MEDIA_PLAYER),
+            CONF_TAGS: [dict(t) for t in config_entry.data.get(CONF_TAGS, [])],
+        }
 
     def _get_registered_tags_options(self):
         """Get options for registered tags dropdown from Home Assistant's Tag registry."""
