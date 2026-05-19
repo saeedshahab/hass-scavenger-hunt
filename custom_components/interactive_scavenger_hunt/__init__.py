@@ -109,13 +109,6 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManager"):
     """Common setup logic for both entry and YAML."""
-    # Get component version from manifest.json dynamically
-    from homeassistant.loader import async_get_integration
-    try:
-        integration = await async_get_integration(hass, DOMAIN)
-        version = integration.version
-    except Exception:
-        version = "1.0.0"
 
     # Register static path for the dashboard card using robust absolute directory resolution
     card_path = os.path.join(os.path.dirname(__file__), "dashboard", "scavenger-hunt-card.js")
@@ -131,59 +124,6 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
     else:
         _LOGGER.error("Scavenger hunt dashboard card not found at expected path: %s", card_path)
 
-    # Automatically register Lovelace resource with cache buster to force browser update
-    async def async_register_lovelace_resource():
-        """Register Lovelace resource."""
-        # Wait up to 10 seconds for Lovelace to be loaded in hass.data (essential for boot concurrency)
-        for i in range(5):
-            if "lovelace" in hass.data:
-                break
-            _LOGGER.debug("Lovelace not yet in hass.data, retrying resource registration in 2s (attempt %d/5)", i + 1)
-            await asyncio.sleep(2)
-
-        if "lovelace" not in hass.data:
-            _LOGGER.warning("Lovelace not found in hass.data after waiting, skipping resource registration")
-            return
-
-        resources = hass.data["lovelace"].get("resources")
-        if resources:
-            target_url = f"/scavenger-hunt-card.js?v={version}"
-            try:
-                items = list(resources.async_items())
-            except AttributeError:
-                items = list(getattr(resources, "data", []))
-            
-            # Find and clean up any old registered resources of scavenger-hunt-card.js
-            for item in items:
-                item_url = item.get("url", "")
-                if "/scavenger-hunt-card.js" in item_url and item_url != target_url:
-                    _LOGGER.info("Removing outdated Lovelace resource: %s", item_url)
-                    if hasattr(resources, "async_delete_item"):
-                        try:
-                            await resources.async_delete_item(item.get("id"))
-                        except Exception as e:
-                            _LOGGER.error("Failed to delete Lovelace resource %s: %s", item_url, e)
-
-            # Re-fetch items to verify if we need to add the new target_url
-            try:
-                items = list(resources.async_items())
-            except AttributeError:
-                items = list(getattr(resources, "data", []))
-            
-            if not any(res.get("url") == target_url for res in items):
-                _LOGGER.info("Automatically registering Lovelace resource: %s", target_url)
-                if hasattr(resources, "async_create_item"):
-                    await resources.async_create_item({"res_type": "module", "url": target_url})
-
-    # If Home Assistant is already fully running, run the registration immediately.
-    # Otherwise, wait for the start event to ensure lovelace storage has initialized.
-    if hass.is_running:
-        hass.async_create_task(async_register_lovelace_resource())
-    else:
-        hass.bus.async_listen_once(
-            EVENT_HOMEASSISTANT_START,
-            lambda event: hass.async_create_task(async_register_lovelace_resource())
-        )
 
     # Register services
     async def handle_reveal_total(call):
