@@ -134,7 +134,15 @@ async def _async_setup_common(hass: HomeAssistant, manager: "ScavengerHuntManage
     # Automatically register Lovelace resource with cache buster to force browser update
     async def async_register_lovelace_resource():
         """Register Lovelace resource."""
+        # Wait up to 10 seconds for Lovelace to be loaded in hass.data (essential for boot concurrency)
+        for i in range(5):
+            if "lovelace" in hass.data:
+                break
+            _LOGGER.debug("Lovelace not yet in hass.data, retrying resource registration in 2s (attempt %d/5)", i + 1)
+            await asyncio.sleep(2)
+
         if "lovelace" not in hass.data:
+            _LOGGER.warning("Lovelace not found in hass.data after waiting, skipping resource registration")
             return
 
         resources = hass.data["lovelace"].get("resources")
