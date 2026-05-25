@@ -20,6 +20,39 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         
     async_add_entities(entities)
 
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the scavenger hunt binary sensors from a config entry."""
+    manager = hass.data[DOMAIN]
+    
+    # Clean up orphaned tag entities from the Entity Registry
+    from homeassistant.helpers import entity_registry as er
+    entity_registry = er.async_get(hass)
+    
+    registry_entries = er.async_entries_for_config_entry(
+        entity_registry, config_entry.entry_id
+    )
+    
+    configured_tag_unique_ids = {
+        f"{DOMAIN}_tag_{tag_id.replace(':', '_')}" 
+        for tag_id in manager.tags_config
+    }
+    
+    for registry_entry in registry_entries:
+        if (
+            registry_entry.domain == "binary_sensor"
+            and registry_entry.unique_id.startswith(f"{DOMAIN}_tag_")
+            and registry_entry.unique_id not in configured_tag_unique_ids
+        ):
+            entity_registry.async_remove(registry_entry.entity_id)
+
+    entities = [ScavengerHuntCompletionSensor(manager)]
+    
+    # Add an entity for each tag
+    for tag_id, tag_config in manager.tags_config.items():
+        entities.append(ScavengerHuntTagSensor(manager, tag_id, tag_config["name"]))
+        
+    async_add_entities(entities)
+
 class ScavengerHuntCompletionSensor(BinarySensorEntity):
     """Sensor tracking if the hunt is complete."""
 
