@@ -1,0 +1,85 @@
+{
+  "config": {
+    "error": {
+      "missing_tag_id": "You must select a registered tag or enter a custom tag ID."
+    },
+    "step": {
+      "user": {
+        "title": "Configure scavenger hunt",
+        "description": "Set up your interactive scavenger hunt base options.",
+        "data": {
+          "title": "Hunt title",
+          "lights": "Lights to flash",
+          "media_player": "Speaker for sound effects"
+        }
+      },
+      "manage_tags": {
+        "title": "Manage hunt tags",
+        "description": "Choose an action to configure the tags for your hunt.",
+        "menu_options": {
+          "add_tag": "Add a new tag",
+          "remove_tag": "Remove an existing tag",
+          "finish": "Finish and create hunt"
+        }
+      },
+      "add_tag": {
+        "title": "Add new tag",
+        "description": "Define the physical tag (NFC/QR) details. You can select an existing tag from your Home Assistant registry or write a custom ID below.",
+        "data": {
+          "selected_tag": "Choose registered tag",
+          "tag_id": "Tag ID / scanned payload (or custom entry)",
+          "name": "Tag friendly name / location",
+          "required": "Required tag (for one-time bypass guess)"
+        }
+      },
+      "remove_tag": {
+        "title": "Remove tag",
+        "description": "Select the tags you want to remove.",
+        "data": {
+          "tags_to_remove": "Tags to delete"
+        }
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "missing_tag_id": "You must select a registered tag or enter a custom tag ID."
+    },
+    "step": {
+      "init": {
+        "title": "Manage scavenger hunt",
+        "description": "Select an action to modify your hunt settings or tags.",
+        "menu_options": {
+          "edit_settings": "Edit settings (lights, speaker)",
+          "add_tag": "Add a new tag",
+          "remove_tag": "Remove an existing tag"
+        }
+      },
+      "edit_settings": {
+        "title": "Edit settings",
+        "description": "Update the target lights or speaker.",
+        "data": {
+          "lights": "Lights to flash",
+          "media_player": "Speaker for sound effects"
+        }
+      },
+      "add_tag": {
+        "title": "Add new tag",
+        "description": "Define the physical tag (NFC/QR) details. You can select an existing tag from your Home Assistant registry or write a custom ID below.",
+        "data": {
+          "selected_tag": "Choose registered tag",
+          "tag_id": "Tag ID / scanned payload (or custom entry)",
+          "name": "Tag friendly name / location",
+          "required": "Required tag (for one-time bypass guess)"
+        }
+      },
+      "remove_tag": {
+        "title": "Remove tag",
+        "description": "Select the tags you want to remove.",
+        "data": {
+          "tags_to_remove": "Tags to delete"
+        }
+      }
+    }
+  }
+}
