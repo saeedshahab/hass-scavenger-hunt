@@ -6,7 +6,7 @@ CONF_TAG_ID = "tag_id"
 CONF_NAME = "name"
 CONF_REQUIRED = "required"
 
-EVENT_HUNT_UPDATE = "interactive_scavenger_hunt_update"
+EVENT_HUNT_UPDATE = "shrine_hunt_update"
 EVENT_TAG_SCANNED = "tag_scanned"
 
 SERVICE_REVEAL_TOTAL = "reveal_total"

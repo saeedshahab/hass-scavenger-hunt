@@ -599,15 +599,9 @@ class ScavengerHuntCard extends HTMLElement {
     const completionState = hass.states[binarySensorId];
 
     if (scoreState) {
-      let score = parseInt(scoreState.state, 10);
-      if (isNaN(score)) {
-        score = 0;
-      }
+      const score = parseInt(scoreState.state, 10);
       const attrs = scoreState.attributes;
-      let total = parseInt(attrs.total_tags, 10);
-      if (isNaN(total) || total <= 0) {
-        total = 20;
-      }
+      const total = attrs.total_tags || 20;
       const revealed = attrs.revealed_total || false;
       const lastTag = attrs.last_tag || "Keep searching...";
 
